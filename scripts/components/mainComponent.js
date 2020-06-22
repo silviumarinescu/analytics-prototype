@@ -42,7 +42,7 @@ export default Vue.component('mainComponent', {
         <div class="container">
           <div class="navbar-brand">
             <a class="navbar-item" href="#">
-            <img src="../../images/logo.svg" alt="Logo">
+            <img src="images/logo.svg" alt="Logo">
             <h1 class="title">&nbsp;&nbsp;Analytics</h1>
             </a>
           </div>
