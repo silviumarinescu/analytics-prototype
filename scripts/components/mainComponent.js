@@ -54,7 +54,10 @@ export default Vue.component('mainComponent', {
             <div class="column is-4">
               <div class="card large">
                 <div class="card-content">
-                  aaaaa {{totalSales}}
+                  Total Sales: {{totalSales}}
+                </div>
+                <div class="card-content">
+                  <a href="https://silviumarinescu.github.io/analytics-prototype/test/" target="_blank">Test</a>
                 </div>
               </div>
             </div>
