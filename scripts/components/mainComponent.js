@@ -12,30 +12,22 @@ export default Vue.component('mainComponent', {
     }
   },
   created: function () {
-    // setTimeout(() => {
-    // db.doc('projects/proj1').onSnapshot((docSnapshot) => {
-    //   // this.totalSales = docSnapshot.totalSales;
-    //   if (docSnapshot) {
-    //     console.log(docSnapshot.doc.data())
-    //   }
-    //   // console.log(docSnapshot.totalSales)
-    // })
-    
+    db.doc('projects/proj1').onSnapshot((doc) => {
+      this.totalSales = doc.data().totalSales
+    })
+
     setInterval(async () => {
       await createEvent('cart', 'item-added', '1.0', {
         projectId: 'proj1',
         userId: 'user1',
         producId: 'prod1',
-        qty: 3,
+        qty: parseInt(Math.random() * 10) + 1,
       })
       await createEvent('cart', 'checkout', '1.0', {
         projectId: 'proj1',
         userId: 'user1',
       })
-      this.totalSales = database.data.projects.proj1.totalSales;
-      // console.log('here', database.data.projects.proj1.totalSales);
-    }, 3000)
-    // }, 500)
+    }, 1000)
   },
   template: `
     <div>
