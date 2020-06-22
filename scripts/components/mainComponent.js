@@ -20,6 +20,7 @@ export default Vue.component('mainComponent', {
     //   }
     //   // console.log(docSnapshot.totalSales)
     // })
+    
     setInterval(async () => {
       await createEvent('cart', 'item-added', '1.0', {
         projectId: 'proj1',
