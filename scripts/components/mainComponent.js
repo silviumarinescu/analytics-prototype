@@ -1,8 +1,8 @@
 // import './innerComponent.js'
 // import './card.js'
 import db from '../lib/db/index.js'
-import database from '../lib/db/local-database.js'
 import { createEvent } from '../events/create-event.js'
+import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
 
 export default Vue.component('mainComponent', {
   data: () => {
@@ -12,10 +12,30 @@ export default Vue.component('mainComponent', {
     }
   },
   created: function () {
-    db.doc('projects/proj1').onSnapshot((doc) => {
-      this.totalSales = doc.data().totalSales
-    })
+    const startDate = moment().add('minute', -7).startOf('minute').format('x')
+    const endDate = moment().startOf('minute').format('x')
 
+    setTimeout(() => {
+      db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
+        (querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+            console.log(doc.data().totalSales)
+          })
+        },
+      )
+    }, 2000)
+
+    // db.doc(`projects/proj1/analytics/data/minute`).onSnapshot((doc) => {
+    //    console.log('here',doc)
+    //   // console.log('here',doc.data())
+    //   // console.log(doc.data().totalSales)
+    // })
+
+    //  db.doc(`projects/proj1/analytics/minute`).onSnapshot((doc) => {
+    //   console.log(doc.data().totalSales)
+    // })
+
+    // create fake sales
     setInterval(async () => {
       await createEvent('cart', 'item-added', '1.0', {
         projectId: 'proj1',

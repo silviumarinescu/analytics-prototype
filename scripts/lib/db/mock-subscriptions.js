@@ -13,6 +13,15 @@ const sub = {
           id: Object.keys(data)[i],
           data: () => data[Object.keys(data)[i]],
         },
+        forEach: (forCallback) => {
+          const array = database.get(path)
+          for (let i = 0; i < Object.keys(array).length; i++) {
+            forCallback({
+              id: Object.keys(array)[i],
+              data: () => array[Object.keys(array)[i]],
+            })
+          }
+        }
       })
     return () => {
       sub.subscriptions = sub.subscriptions.splice(subIndex, 1)

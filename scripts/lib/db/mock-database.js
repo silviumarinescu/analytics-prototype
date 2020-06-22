@@ -105,7 +105,7 @@ const localDatabase = {
         }
       },
       onSnapshot: (callback) => {
-        let unsubscribe = () => {}
+        let unsubscribe = sub.subscribe(path, callback)
         callback({
           forEach: (forCallback) => {
             const array = database.get(path)

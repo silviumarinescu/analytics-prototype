@@ -123,33 +123,11 @@ describe('example-flow', () => {
     chai.expect(project.totalSales).to.equal(100)
 
     // get analytics data
-    let analytics = []
+    let totalSales;
     ;(
-      await db.collection(`projects/${projectId}/analytics`).get()
-    ).forEach((doc) => analytics.push({ ...doc.data(), id: doc.id }))
-    ;[
-      'minute',
-      'hour',
-      'day',
-      'week',
-      'month',
-      'quarter',
-      'year',
-    ].forEach((t) => {
-      console.log(t)
-      chai
-        .expect(
-          analytics.find((a) => a.id == t)[moment().startOf(t).format('x')]
-            .totalSales,
-        )
-        .to.equal(100)
-    })
-    chai
-      .expect(
-        analytics.find((a) => a.id == 'minute')[
-          moment().startOf('minute').format('x')
-        ].totalSales,
-      )
-      .to.equal(100)
+      await db.collection(`projects/${projectId}/analytics/minute/records`).get()
+    ).forEach((doc) => totalSales =doc.data().totalSales)
+    // check analytics data
+    chai.expect(project.totalSales).to.equal(totalSales)
   })
 })

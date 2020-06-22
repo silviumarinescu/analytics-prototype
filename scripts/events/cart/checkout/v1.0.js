@@ -4,6 +4,7 @@ import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
 export default (event) =>
   new Promise(async (accept, reject) => {
     const database = (await import(`../../../lib/db/index.js`)).default
+    const db = (await import(`../../../lib/db/local-database.js`)).default
     const payload = { ...event.payload }
     const projectId = payload.projectId
     delete payload.projectId
@@ -46,7 +47,7 @@ export default (event) =>
     await Promise.all(
       ['minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].map((t) =>
         database
-          .collection(`projects/${projectId}/analytics/${t}`)
+          .collection(`projects/${projectId}/analytics/${t}/records`)
           .doc(moment(event.date, 'x').startOf(t).format('x'))
           .set({ totalSales: increment }),
       ),
