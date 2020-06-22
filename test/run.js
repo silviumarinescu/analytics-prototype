@@ -1,4 +1,4 @@
-import '../scripts/events/cart/cart.test.js';
+import './example-flow.test.js';
 
 mocha.checkLeaks();
 mocha.run();
