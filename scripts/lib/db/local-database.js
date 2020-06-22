@@ -13,7 +13,8 @@ const database = {
   },
   set: async (path, data, id) => {
     _.set(database.data, `${path.replace(/\//g, '.')}.${id}`, data);
-    sub.sync(`${path}/${id}`);
+    sub.sync(`${path}`);
+    sub.docSync(`${path}/${id}`)
     if (path === 'events') await eventStore.process({ ...data, id });
   },
   remove: async path => {
@@ -30,6 +31,7 @@ const database = {
     }, {});
     _.set(database.data, parentPath, parentObject);
     sub.sync(parentPath);
+    sub.docSync(path)
   },
 };
 

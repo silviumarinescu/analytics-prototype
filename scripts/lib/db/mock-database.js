@@ -48,8 +48,7 @@ const localDatabase = {
         })
       },
       onSnapshot: (callback) => {
-        let unsubscribe = sub.subscribe(path, callback)
-        callback(database.get(path))
+        let unsubscribe = sub.docSubscribe(path, callback)
         return () => {
           unsubscribe()
         }
