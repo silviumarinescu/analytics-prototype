@@ -1,5 +1,6 @@
 import db from '../scripts/lib/db/index.js'
 import { createEvent } from '../scripts/events/create-event.js'
+import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
 
 describe('example-flow', () => {
   it('example-flow', async () => {
@@ -88,12 +89,11 @@ describe('example-flow', () => {
     chai.expect(cart.length).to.equal(2)
     chai.expect(user.cartTotal).to.equal(145)
 
-
     // remove product 1 from cart
     await createEvent('cart', 'item-removed', '1.0', {
       projectId,
       userId,
-      producId: produc1Id
+      producId: produc1Id,
     })
     cart = []
     ;(
@@ -107,7 +107,7 @@ describe('example-flow', () => {
     // user buys cart
     await createEvent('cart', 'checkout', '1.0', {
       projectId,
-      userId
+      userId,
     })
     cart = []
     ;(
@@ -121,6 +121,36 @@ describe('example-flow', () => {
     chai.expect(cart.length).to.equal(0)
     chai.expect(user.cartTotal).to.equal(0)
     chai.expect(project.totalSales).to.equal(100)
-    
+
+    // get analytics data
+    let analytics = []
+    ;(
+      await db.collection(`projects/${projectId}/analytics`).get()
+    ).forEach((doc) => analytics.push({ ...doc.data(), id: doc.id }))
+
+    ;[
+      'minute',
+      'hour',
+      'day',
+      'week',
+      'month',
+      'quarter',
+      'year',
+    ].forEach((t) => {
+      console.log(t)
+      chai
+        .expect(
+          analytics.find((a) => a.id == t)[moment().startOf(t).format('x')]
+            .totalSales,
+        )
+        .to.equal(100)
+    })
+    chai
+      .expect(
+        analytics.find((a) => a.id == 'minute')[
+          moment().startOf('minute').format('x')
+        ].totalSales,
+      )
+      .to.equal(100)
   })
 })

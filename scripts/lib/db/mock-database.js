@@ -33,12 +33,12 @@ const localDatabase = {
             typeof ob[v] == 'object' &&
             Object.keys(ob[v]).length == 1 &&
             Object.keys(ob[v])[0] == 'incrementValue'
-          ) 
-          a[v] += ob[v].incrementValue;
-           else a[v] = ob[v]
+          )
+            a[v] += ob[v].incrementValue
+          else a[v] = ob[v]
           return a
         }, doc)
-        
+
         const docId = path.split('/')[path.split('/').length - 1]
         const docCollection = path.replace(`/${docId}`, '')
         database.set(docCollection, doc, docId)
@@ -84,7 +84,20 @@ const localDatabase = {
           set: (docData) => {
             return new Promise(async (success, error) => {
               if (path === 'events' || allow()) {
-                await database.set(path, docData, docId)
+                let doc = { ...database.get(`${path}/${docId}`) }
+                doc = Object.keys(docData).reduce((a, v) => {
+                  if (
+                    typeof docData[v] == 'object' &&
+                    Object.keys(docData[v]).length == 1 &&
+                    Object.keys(docData[v])[0] == 'incrementValue'
+                  ) {
+                    if (a[v] == undefined) a[v] = docData[v].incrementValue
+                    else a[v] += docData[v].incrementValue
+                  } else a[v] = docData[v]
+                  return a
+                }, doc)
+
+                await database.set(path, doc, docId)
                 success()
               } else error(new Error('operation not allowed'))
             })

@@ -1,4 +1,6 @@
 import { firebase } from '../../../lib/utils/firebase-mock.js'
+import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
+
 export default (event) =>
   new Promise(async (accept, reject) => {
     const database = (await import(`../../../lib/db/index.js`)).default
@@ -35,10 +37,45 @@ export default (event) =>
       cartTotal: 0,
     })
 
+    const increment = firebase.firestore.FieldValue.increment(cartTotal)
     // increment project total sails
     await database.doc(`projects/${projectId}`).update({
-      totalSales: firebase.firestore.FieldValue.increment(cartTotal),
+      totalSales: increment,
     })
+
+    // option 1
+    // const startDate = moment().addDays(-7)
+    // for(let i=0; i<7; i++){
+    //   const id = startDate.addDays(i).startOf('day').format('x');
+    //   const totalSails = await database.doc(`projects/${projectId}/analytics/${id}`).get()
+    // }
+
+    // const startDate = moment().addDays(-7).startOf('day').format('x')
+    // const endDate = moment().startOf('day').format('x')
+
+    // database.collection("projects/${projectId}/analytics/day").where("id", "<", startDate).where("id", ">", endDate)
+    // .get()
+
+    const log = []
+    log.push([moment(event.date, 'x').startOf('minute').format('x'), 'minute'])
+    log.push([moment(event.date, 'x').startOf('hour').format('x'), 'hour'])
+    log.push([moment(event.date, 'x').startOf('day').format('x'), 'day'])
+    log.push([moment(event.date, 'x').startOf('week').format('x'), 'week'])
+    log.push([moment(event.date, 'x').startOf('month').format('x'), 'month'])
+    log.push([
+      moment(event.date, 'x').startOf('quarter').format('x'),
+      'quarter',
+    ])
+    log.push([moment(event.date, 'x').startOf('year').format('x'), 'year'])
+
+    await Promise.all(
+      log.map((l) =>
+        database
+          .collection(`projects/${projectId}/analytics/${l[1]}`)
+          .doc(l[0])
+          .set({ totalSales: increment }),
+      ),
+    )
 
     accept()
   })
