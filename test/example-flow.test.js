@@ -1,8 +1,8 @@
-import db from '../../../scripts/lib/db/index.js'
-import { createEvent } from '../create-event.js'
+import db from '../scripts/lib/db/index.js'
+import { createEvent } from '../scripts/events/create-event.js'
 
-describe('cart', () => {
-  it('flow', async () => {
+describe('example-flow', () => {
+  it('example-flow', async () => {
     // create a project
     const projectId = await createEvent('project', 'project-created', '1.0', {
       name: 'test project',
