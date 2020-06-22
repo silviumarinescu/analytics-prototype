@@ -43,36 +43,11 @@ export default (event) =>
       totalSales: increment,
     })
 
-    // option 1
-    // const startDate = moment().addDays(-7)
-    // for(let i=0; i<7; i++){
-    //   const id = startDate.addDays(i).startOf('day').format('x');
-    //   const totalSails = await database.doc(`projects/${projectId}/analytics/${id}`).get()
-    // }
-
-    // const startDate = moment().addDays(-7).startOf('day').format('x')
-    // const endDate = moment().startOf('day').format('x')
-
-    // database.collection("projects/${projectId}/analytics/day").where("id", "<", startDate).where("id", ">", endDate)
-    // .get()
-
-    const log = []
-    log.push([moment(event.date, 'x').startOf('minute').format('x'), 'minute'])
-    log.push([moment(event.date, 'x').startOf('hour').format('x'), 'hour'])
-    log.push([moment(event.date, 'x').startOf('day').format('x'), 'day'])
-    log.push([moment(event.date, 'x').startOf('week').format('x'), 'week'])
-    log.push([moment(event.date, 'x').startOf('month').format('x'), 'month'])
-    log.push([
-      moment(event.date, 'x').startOf('quarter').format('x'),
-      'quarter',
-    ])
-    log.push([moment(event.date, 'x').startOf('year').format('x'), 'year'])
-
     await Promise.all(
-      log.map((l) =>
+      ['minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].map((t) =>
         database
-          .collection(`projects/${projectId}/analytics/${l[1]}`)
-          .doc(l[0])
+          .collection(`projects/${projectId}/analytics/${t}`)
+          .doc(moment(event.date, 'x').startOf(t).format('x'))
           .set({ totalSales: increment }),
       ),
     )

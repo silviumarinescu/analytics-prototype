@@ -127,7 +127,6 @@ describe('example-flow', () => {
     ;(
       await db.collection(`projects/${projectId}/analytics`).get()
     ).forEach((doc) => analytics.push({ ...doc.data(), id: doc.id }))
-
     ;[
       'minute',
       'hour',
