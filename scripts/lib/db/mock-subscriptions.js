@@ -30,7 +30,7 @@ const sub = {
   },
   sync: (path) => {
     const subscription = sub.subscriptions.find((s) => s.path === path)
-    if (subscription) {
+    if (subscription && database.get(path)) {
       const newData = Object.keys(database.get(path)).sort()
       const oldData = Object.keys(subscription.data).sort()
       const toInsert = []

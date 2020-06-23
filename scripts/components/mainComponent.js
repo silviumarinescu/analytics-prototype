@@ -7,13 +7,10 @@ import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
 export default Vue.component('mainComponent', {
   data: () => {
     return {
-      totalSales: 0,
-      list: [1, 2, 3, 4, 566, 66, 6, 66],
-
       series: [
         {
-          name: 'Desktops',
-          data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+          name: 'Sales',
+          data: [],
         },
       ],
       chartOptions: {
@@ -31,58 +28,80 @@ export default Vue.component('mainComponent', {
           curve: 'straight',
         },
         title: {
-          text: 'Product Trends by Month',
+          text: 'Loading...',
           align: 'left',
         },
         grid: {
           row: {
-            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            colors: ['#f3f3f3', 'transparent'],
             opacity: 0.5,
           },
         },
         xaxis: {
-          categories: [
-            'Jan',
-            'Feb',
-            'Mar',
-            'Apr',
-            'May',
-            'Jun',
-            'Jul',
-            'Aug',
-            'Sep',
-          ],
+          categories: [],
         },
       },
     }
   },
   created: function () {
-    const startDate = moment().add('minute', -7).startOf('minute').format('x')
-    const endDate = moment().startOf('minute').format('x')
+    const nrOfMinutes = 7;
+    db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
+      (querySnapshot) => {
+        const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
+          const date = moment()
+            .add('minute', (nrOfMinutes - 1 - i) * -1)
+            .startOf('minute')
+          return {
+            id: date.format('x'),
+            label: date.format('hh:mm'),
+            value: 0,
+          }
+        })
 
-    setTimeout(() => {
-      db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
-        (querySnapshot) => {
-          console.log('------------------')
+        querySnapshot.forEach((doc) => {
+          const index = data.findIndex((d) => d.id == doc.id)
+          data[index].value = doc.data().totalSales
+        })
 
-          querySnapshot.forEach((doc) => {
-            console.log(doc.data(), doc.id)
-          })
+        this.series = [
+          {
+            name: 'Sales',
+            data: [...data.map((d) => d.value)],
+          },
+        ]
 
-          console.log('------------------')
-        },
-      )
-    }, 2000)
-
-    // db.doc(`projects/proj1/analytics/data/minute`).onSnapshot((doc) => {
-    //    console.log('here',doc)
-    //   // console.log('here',doc.data())
-    //   // console.log(doc.data().totalSales)
-    // })
-
-    //  db.doc(`projects/proj1/analytics/minute`).onSnapshot((doc) => {
-    //   console.log(doc.data().totalSales)
-    // })
+        this.chartOptions = {
+          chart: {
+            height: 350,
+            type: 'line',
+            zoom: {
+              enabled: false,
+            },
+          },
+          dataLabels: {
+            enabled: false,
+          },
+          stroke: {
+            curve: 'straight',
+          },
+          title: {
+            text: `Total Sales in the passed ${nrOfMinutes} minutes: ${data.reduce(
+              (t, n) => t + n.value, 0
+            )}$`,
+            align: 'left',
+          },
+          grid: {
+            row: {
+              colors: ['#f3f3f3', 'transparent'],
+              opacity: 0.5,
+            },
+          },
+          xaxis: {
+            categories: [...data.map((d) => d.label)],
+          },
+        }
+      },
+    )
 
     // create fake sales
     setInterval(async () => {
