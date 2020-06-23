@@ -3,26 +3,27 @@ const sub = {
   subscriptions: [],
   docSubscriptions: [],
   subscribe: (path, callback) => {
-    const data = { ...database.get(path) }
-    sub.subscriptions.push({ path, data, callback })
+    //  const data = { ...database.get(path) }
+    sub.subscriptions.push({ path, data: {}, callback })
     const subIndex = sub.subscriptions.length
-    for (let i = 0; i < Object.keys(data).length; i++)
-      callback({
-        type: 'added',
-        doc: {
-          id: Object.keys(data)[i],
-          data: () => data[Object.keys(data)[i]],
-        },
-        forEach: (forCallback) => {
-          const array = database.get(path)
-          for (let i = 0; i < Object.keys(array).length; i++) {
-            forCallback({
-              id: Object.keys(array)[i],
-              data: () => array[Object.keys(array)[i]],
-            })
-          }
-        }
-      })
+    sub.sync(path)
+    // for (let i = 0; i < Object.keys(data).length; i++)
+    //   callback({
+    //     type: 'added',
+    //     doc: {
+    //       id: Object.keys(data)[i],
+    //       data: () => data[Object.keys(data)[i]],
+    //     },
+    //     forEach: (forCallback) => {
+    //       const array = database.get(path)
+    //       for (let i = 0; i < Object.keys(array).length; i++) {
+    //         forCallback({
+    //           id: Object.keys(array)[i],
+    //           data: () => array[Object.keys(array)[i]],
+    //         })
+    //       }
+    //     }
+    //   })
     return () => {
       sub.subscriptions = sub.subscriptions.splice(subIndex, 1)
     }
@@ -57,24 +58,38 @@ const sub = {
         }
       }
 
-      toInsert.forEach((id) => {
-        subscription.data[id] = database.get(path)[id]
-        subscription.callback({
-          type: 'added',
-          doc: {
-            id,
-            data: () => database.get(path)[id],
-          },
-        })
+      subscription.callback({
+        forEach: (forCallback) => {
+          newData.forEach((key) => {
+            forCallback({
+              id: key,
+              data: () => database.get(path)[key],
+            })
+          })
+        },
       })
 
-      toDelete.forEach((id) => {
-        delete subscription.data[id]
-        subscription.callback({
-          type: 'removed',
-          doc: { id },
-        })
-      })
+      // add docChanges
+
+      // toInsert.forEach((id) => {
+      //   subscription.data[id] = database.get(path)[id]
+
+      //   subscription.callback({
+      //     type: 'added',
+      //     doc: {
+      //       id,
+      //       data: () => database.get(path)[id],
+      //     },
+      //   })
+      // })
+
+      // toDelete.forEach((id) => {
+      //   delete subscription.data[id]
+      //   subscription.callback({
+      //     type: 'removed',
+      //     doc: { id },
+      //   })
+      // })
     }
   },
   unsubscribe: () => {},

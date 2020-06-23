@@ -106,24 +106,25 @@ const localDatabase = {
       },
       onSnapshot: (callback) => {
         let unsubscribe = sub.subscribe(path, callback)
-        callback({
-          forEach: (forCallback) => {
-            const array = database.get(path)
-            for (let i = 0; i < Object.keys(array).length; i++) {
-              forCallback({
-                id: Object.keys(array)[i],
-                data: () => array[Object.keys(array)[i]],
-              })
-            }
-          },
-          docChanges: () => {
-            return {
-              forEach: (callback) => {
-                unsubscribe = sub.subscribe(path, callback)
-              },
-            }
-          },
-        })
+        // callback({
+        //   forEach: (forCallback) => {
+        //     const array = database.get(path)            
+        //     if (array)
+        //       for (let i = 0; i < Object.keys(array).length; i++) {
+        //         forCallback({
+        //           id: Object.keys(array)[i],
+        //           data: () => array[Object.keys(array)[i]],
+        //         })
+        //       }
+        //   },
+        //   docChanges: () => {
+        //     return {
+        //       forEach: (callback) => {
+        //         unsubscribe = sub.subscribe(path, callback)
+        //       },
+        //     }
+        //   },
+        // })
         return () => {
           unsubscribe()
         }
