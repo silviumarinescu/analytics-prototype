@@ -44,7 +44,7 @@ export default Vue.component('mainComponent', {
     }
   },
   created: function () {
-    const nrOfMinutes = 10;
+    const nrOfMinutes = 2;
     db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
       (querySnapshot) => {
         const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
@@ -60,6 +60,7 @@ export default Vue.component('mainComponent', {
 
         querySnapshot.forEach((doc) => {
           const index = data.findIndex((d) => d.id == doc.id)
+          if(index !== -1)
           data[index].value = doc.data().totalSales
         })
 
