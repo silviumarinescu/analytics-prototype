@@ -49,7 +49,7 @@ export default Vue.component('mainComponent', {
       (querySnapshot) => {
         const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
           const date = moment()
-            .add('minute', (nrOfMinutes - 1 - i) * -1)
+            .add((nrOfMinutes - 1 - i) * -1, 'minute')
             .startOf('minute')
           return {
             id: date.format('x'),
