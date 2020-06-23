@@ -1,5 +1,5 @@
-// import './innerComponent.js'
-// import './card.js'
+Vue.component('apexchart', VueApexCharts)
+
 import db from '../lib/db/index.js'
 import { createEvent } from '../events/create-event.js'
 import moment from 'https://unpkg.com/moment@2.27.0/dist/moment.js'
@@ -9,6 +9,51 @@ export default Vue.component('mainComponent', {
     return {
       totalSales: 0,
       list: [1, 2, 3, 4, 566, 66, 6, 66],
+
+      series: [
+        {
+          name: 'Desktops',
+          data: [10, 41, 35, 51, 49, 62, 69, 91, 148],
+        },
+      ],
+      chartOptions: {
+        chart: {
+          height: 350,
+          type: 'line',
+          zoom: {
+            enabled: false,
+          },
+        },
+        dataLabels: {
+          enabled: false,
+        },
+        stroke: {
+          curve: 'straight',
+        },
+        title: {
+          text: 'Product Trends by Month',
+          align: 'left',
+        },
+        grid: {
+          row: {
+            colors: ['#f3f3f3', 'transparent'], // takes an array which will be repeated on columns
+            opacity: 0.5,
+          },
+        },
+        xaxis: {
+          categories: [
+            'Jan',
+            'Feb',
+            'Mar',
+            'Apr',
+            'May',
+            'Jun',
+            'Jul',
+            'Aug',
+            'Sep',
+          ],
+        },
+      },
     }
   },
   created: function () {
@@ -18,9 +63,13 @@ export default Vue.component('mainComponent', {
     setTimeout(() => {
       db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
         (querySnapshot) => {
+          console.log('------------------')
+
           querySnapshot.forEach((doc) => {
-            console.log(doc.data().totalSales)
+            console.log(doc.data(), doc.id)
           })
+
+          console.log('------------------')
         },
       )
     }, 2000)
@@ -51,7 +100,7 @@ export default Vue.component('mainComponent', {
   },
   template: `
     <div>
-      <nav class="navbar">
+      <nav class="navbar is-fixed-top">
         <div class="container">
           <div class="navbar-brand">
             <a class="navbar-item" href="#">
@@ -61,27 +110,14 @@ export default Vue.component('mainComponent', {
           </div>
         </div>
       </nav>
-      <div class="container">
-        <div class="section">
-          <div class="row columns is-multiline">
-            <div class="column is-4">
-              <div class="card large">
-                <div class="card-content">
-                  Total Sales: {{totalSales}}
-                </div>
-                <div class="card-content">
-                  <a href="https://silviumarinescu.github.io/analytics-prototype/test/" target="_blank">Test</a>
-                </div>
-              </div>
-            </div>
-          </div>  
+
+      <section class="hero is-light is-fullheight">
+        <div class="hero-body">
+          <div class="container">
+            <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
+          </div>
         </div>
-      </div>
+      </section>
     </div>
       `,
-  methods: {
-    incrementCounter: function () {
-      this.count += 1
-    },
-  },
 })
