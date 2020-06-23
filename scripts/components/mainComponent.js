@@ -44,7 +44,7 @@ export default Vue.component('mainComponent', {
     }
   },
   created: function () {
-    const nrOfMinutes = 7;
+    const nrOfMinutes = 10;
     db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
       (querySnapshot) => {
         const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
