@@ -49,7 +49,7 @@ export default (event) =>
         database
           .collection(`projects/${projectId}/analytics/${t}/records`)
           .doc(moment(event.date, 'x').startOf(t).format('x'))
-          .set({ totalSales: increment }),
+          .set({ totalSales: increment, date: moment(event.date, 'x').startOf(t).format('x')}),
       ),
     )
 

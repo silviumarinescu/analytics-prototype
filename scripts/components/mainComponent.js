@@ -45,64 +45,77 @@ export default Vue.component('mainComponent', {
   },
   created: function () {
     const nrOfMinutes = 10;
-    db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
-      (querySnapshot) => {
-        const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
-          const date = moment()
-            .add((nrOfMinutes - 1 - i) * -1, 'minute')
-            .startOf('minute')
-          return {
-            id: date.format('x'),
-            label: date.format('hh:mm'),
-            value: 0,
-          }
-        })
 
-        querySnapshot.forEach((doc) => {
-          const index = data.findIndex((d) => d.id == doc.id)
-          if(index !== -1)
-          data[index].value = doc.data().totalSales
-        })
+    setTimeout(async ()=>{
+    let projects = []
+    ;(
+      await db
+        .collection(`projects/proj1/analytics/minute/records`)
+        // .add((nrOfMinutes - 1 - i) * -1, 'minute')
+        .where('date', '<=', moment().startOf('minute'))
+        .where('date', '<=', moment().startOf('minute'))
+        .get()
+    ).forEach((doc) => projects.push({...doc.data(), id : doc.id}))
+    console.log(projects)
+  }, 3000)
+    // db.collection(`projects/proj1/analytics/minute/records`).onSnapshot(
+    //   (querySnapshot) => {
+    //     const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
+    //       const date = moment()
+    //         .add((nrOfMinutes - 1 - i) * -1, 'minute')
+    //         .startOf('minute')
+    //       return {
+    //         id: date.format('x'),
+    //         label: date.format('hh:mm'),
+    //         value: 0,
+    //       }
+    //     })
 
-        this.series = [
-          {
-            name: 'Sales',
-            data: [...data.map((d) => d.value)],
-          },
-        ]
+    //     querySnapshot.forEach((doc) => {
+    //       const index = data.findIndex((d) => d.id == doc.id)
+    //       if(index !== -1)
+    //       data[index].value = doc.data().totalSales
+    //     })
 
-        this.chartOptions = {
-          chart: {
-            height: 350,
-            type: 'line',
-            zoom: {
-              enabled: false,
-            },
-          },
-          dataLabels: {
-            enabled: false,
-          },
-          stroke: {
-            curve: 'straight',
-          },
-          title: {
-            text: `Total Sales in the passed ${nrOfMinutes} minutes: ${data.reduce(
-              (t, n) => t + n.value, 0
-            )}$`,
-            align: 'left',
-          },
-          grid: {
-            row: {
-              colors: ['#f3f3f3', 'transparent'],
-              opacity: 0.5,
-            },
-          },
-          xaxis: {
-            categories: [...data.map((d) => d.label)],
-          },
-        }
-      },
-    )
+    //     this.series = [
+    //       {
+    //         name: 'Sales',
+    //         data: [...data.map((d) => d.value)],
+    //       },
+    //     ]
+
+    //     this.chartOptions = {
+    //       chart: {
+    //         height: 350,
+    //         type: 'line',
+    //         zoom: {
+    //           enabled: false,
+    //         },
+    //       },
+    //       dataLabels: {
+    //         enabled: false,
+    //       },
+    //       stroke: {
+    //         curve: 'straight',
+    //       },
+    //       title: {
+    //         text: `Total Sales in the passed ${nrOfMinutes} minutes: ${data.reduce(
+    //           (t, n) => t + n.value, 0
+    //         )}$`,
+    //         align: 'left',
+    //       },
+    //       grid: {
+    //         row: {
+    //           colors: ['#f3f3f3', 'transparent'],
+    //           opacity: 0.5,
+    //         },
+    //       },
+    //       xaxis: {
+    //         categories: [...data.map((d) => d.label)],
+    //       },
+    //     }
+    //   },
+    // )
 
     // create fake sales
     setInterval(async () => {
