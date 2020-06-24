@@ -2,9 +2,9 @@ import database from './local-database.js'
 const sub = {
   subscriptions: [],
   docSubscriptions: [],
-  subscribe: (path, callback) => {
+  subscribe: (path, callback, filters) => {
     //  const data = { ...database.get(path) }
-    sub.subscriptions.push({ path, data: {}, callback })
+    sub.subscriptions.push({ path, data: {}, callback, filters })
     const subIndex = sub.subscriptions.length
     sub.sync(path)
     // for (let i = 0; i < Object.keys(data).length; i++)
@@ -30,8 +30,20 @@ const sub = {
   },
   sync: (path) => {
     const subscription = sub.subscriptions.find((s) => s.path === path)
-    if (subscription && database.get(path)) {
-      const newData = Object.keys(database.get(path)).sort()
+    const data = database.get(path)
+    if (subscription && data) {
+      let newData = Object.keys(database.get(path)).sort()
+      if (subscription.filters) {
+        for (let i = 0; i < subscription.filters.length; i++) {
+          newData = newData
+            .filter((key) =>
+              eval(
+                `data[key][subscription.filters[i].field] ${subscription.filters[i].operation} subscription.filters[i].value`,
+              ),
+            )
+            .sort()
+        }
+      }
       const oldData = Object.keys(subscription.data).sort()
       const toInsert = []
       const toUpdate = []

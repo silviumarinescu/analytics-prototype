@@ -55,18 +55,17 @@ const localDatabase = {
       },
     }
   },
-  collection: (path, array = database.get(path)) => {
+  collection: (path, array = database.get(path), filters=[]) => {
     return {
       where: (field, operation, value) => {
-        array = Object.keys(array)
-          .filter((key) => {
-            console.log(array[key][field])
-            return eval(`array[key][field] ${operation} value`)
-          })
-          .map((k) => array[k])
+        filters.push({field, operation, value})
+        if (array)
+          array = Object.keys(array)
+            .filter((key) => eval(`array[key][field] ${operation} value`))
+            .map((k) => array[k])
 
         return {
-          where: localDatabase.collection(path, array).where,
+          where: localDatabase.collection(path, array, filters).where,
           get: () =>
             new Promise((success) => {
               success({
@@ -81,6 +80,12 @@ const localDatabase = {
                 },
               })
             }),
+          onSnapshot: (callback) => {
+            let unsubscribe = sub.subscribe(path, callback, filters)
+            return () => {
+              unsubscribe()
+            }
+          },
         }
       },
       get: () =>
