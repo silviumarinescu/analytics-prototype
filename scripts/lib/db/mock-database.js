@@ -57,6 +57,30 @@ const localDatabase = {
   },
   collection: (path) => {
     return {
+      where: (field, operation, value) => {
+        return {
+          get: () =>
+            new Promise((success) => {
+              success({
+                forEach: (callback) => {
+                  const array = database.get(path)
+                  if (!array) return
+                  for (let i = 0; i < Object.keys(array).length; i++) {
+                    if (
+                      eval(
+                        `array[Object.keys(array)[i]][field] ${operation} value`,
+                      )
+                    )
+                      callback({
+                        id: Object.keys(array)[i],
+                        data: () => array[Object.keys(array)[i]],
+                      })
+                  }
+                },
+              })
+            }),
+        }
+      },
       get: () =>
         new Promise((success) => {
           success({
@@ -108,7 +132,7 @@ const localDatabase = {
         let unsubscribe = sub.subscribe(path, callback)
         // callback({
         //   forEach: (forCallback) => {
-        //     const array = database.get(path)            
+        //     const array = database.get(path)
         //     if (array)
         //       for (let i = 0; i < Object.keys(array).length; i++) {
         //         forCallback({
