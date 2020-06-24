@@ -48,43 +48,61 @@ export default Vue.component('mainComponent', {
   },
   created: function () {
     const nrOfMinutes = 10
+    let startDate = moment()
+      .add(nrOfMinutes * -1, 'minute')
+      .startOf('minute')
+      .format('x')
+    let endDate = moment().startOf('minute').format('x')
+    const subscribe = () =>
+      db
+        .collection(`projects/proj1/analytics/minute/records`)
+        .where('date', '>', startDate)
+        .where('date', '<=', endDate)
+        .onSnapshot((querySnapshot) => {
+          const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
+            const date = moment()
+              .add((nrOfMinutes - 1 - i) * -1, 'minute')
+              .startOf('minute')
+            return {
+              id: date.format('x'),
+              label: date.format('hh:mm'),
+              value: 0,
+            }
+          })
+          querySnapshot.forEach(function (doc) {
+            const index = data.findIndex((d) => d.id == doc.id)
+            if (index !== -1) data[index].value = doc.data().totalSales
+          })
 
-    db.collection(`projects/proj1/analytics/minute/records`)
-      .where(
-        'date',
-        '>',
-        moment()
+          series[0].data = [...data.map((d) => d.value)]
+          this.series = [...series]
+
+          chartOptions.title.text = `Total Sales in the passed ${nrOfMinutes} minutes: ${data.reduce(
+            (t, n) => t + n.value,
+            0,
+          )}$`
+          chartOptions.xaxis.categories = [...data.map((d) => d.label)]
+          this.chartOptions = { ...chartOptions }
+        })
+    let unsubscribe = subscribe();
+    setInterval(() => {
+      if (
+        startDate !=
+          moment()
+            .add(nrOfMinutes * -1, 'minute')
+            .startOf('minute')
+            .format('x') ||
+        endDate != moment().startOf('minute').format('x')
+      ) {
+        startDate = moment()
           .add(nrOfMinutes * -1, 'minute')
           .startOf('minute')
-          .format('x'),
-      )
-      // .where('date', '<=', moment().startOf('minute').format('x'))
-      .onSnapshot((querySnapshot) => {
-        const data = new Array(nrOfMinutes).fill(null).map((d, i) => {
-          const date = moment()
-            .add((nrOfMinutes - 1 - i) * -1, 'minute')
-            .startOf('minute')
-          return {
-            id: date.format('x'),
-            label: date.format('hh:mm'),
-            value: 0,
-          }
-        })
-        querySnapshot.forEach(function (doc) {
-          const index = data.findIndex((d) => d.id == doc.id)
-          if (index !== -1) data[index].value = doc.data().totalSales
-        })
-
-        series[0].data = [...data.map((d) => d.value)]
-        this.series = [...series]
-
-        chartOptions.title.text = `Total Sales in the passed ${nrOfMinutes} minutes: ${data.reduce(
-          (t, n) => t + n.value,
-          0,
-        )}$`
-        chartOptions.xaxis.categories = [...data.map((d) => d.label)]
-        this.chartOptions = { ...chartOptions }
-      })
+          .format('x')
+        endDate = moment().startOf('minute').format('x')
+        unsubscribe();
+        subscribe();
+      }
+    }, 500)
 
     // create fake sales
     setInterval(async () => {
