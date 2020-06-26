@@ -44,12 +44,40 @@ export default (event) =>
       totalSales: increment,
     })
 
-    await Promise.all(
+    let prevUnits = await Promise.all(
       ['minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].map((t) =>
         database
-          .collection(`projects/${projectId}/analytics/${t}/records`)
-          .doc(moment(event.date, 'x').startOf(t).format('x'))
-          .set({ totalSales: increment, date: moment(event.date, 'x').startOf(t).format('x')}),
+          .doc(
+            `projects/${projectId}/analytics/minute/records/${moment(
+              event.date,
+              'x',
+            )
+              .add(-1, t)
+              .startOf(t)
+              .format('x')}`,
+          )
+          .get(),
+      ),
+    )
+
+
+    prevUnits = prevUnits.map((u) =>
+      firebase.firestore.FieldValue.increment(
+        u.data() && u.data().projectTotal ? u.data().projectTotal : 0,
+      ),
+    )
+
+    await Promise.all(
+      ['minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].map(
+        (t, i) =>
+          database
+            .collection(`projects/${projectId}/analytics/${t}/records`)
+            .doc(moment(event.date, 'x').startOf(t).format('x'))
+            .set({
+              totalSales: increment,
+              projectTotal: prevUnits[i],
+              date: moment(event.date, 'x').startOf(t).format('x'),
+            }),
       ),
     )
 

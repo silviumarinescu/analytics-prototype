@@ -123,11 +123,47 @@ describe('example-flow', () => {
     chai.expect(project.totalSales).to.equal(100)
 
     // get analytics data
-    let totalSales;
+    let totalSales
     ;(
-      await db.collection(`projects/${projectId}/analytics/minute/records`).get()
-    ).forEach((doc) => totalSales =doc.data().totalSales)
+      await db
+        .collection(`projects/${projectId}/analytics/minute/records`)
+        .get()
+    ).forEach((doc) => (totalSales = doc.data().totalSales))
     // check analytics data
     chai.expect(project.totalSales).to.equal(totalSales)
+
+    await createEvent('cart', 'item-added', '1.0', {
+      projectId,
+      userId,
+      producId: produc2Id,
+      qty: 5,
+    })
+
+    await createEvent(
+      'cart',
+      'checkout',
+      '1.0',
+      {
+        projectId,
+        userId,
+      },
+      undefined,
+      moment().startOf('minute').add(1, 'minute').format('x'),
+    )
+
+    let analytics = await Promise.all(
+      ['minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'].map((t) =>
+        db
+          .doc(
+            `projects/${projectId}/analytics/${t}/records/${moment()
+              .add(1, 'minute')
+              .startOf(t)
+              .format('x')}`,
+          )
+          .get(),
+      ),
+    )
+    analytics = analytics.map((u) => u.data())
+    console.log(analytics)
   })
 })

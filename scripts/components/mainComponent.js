@@ -44,6 +44,8 @@ export default Vue.component('mainComponent', {
     return {
       series: [...series],
       chartOptions: { ...chartOptions },
+      selected1: '',
+      selected2: ''
     }
   },
   created: function () {
@@ -84,7 +86,7 @@ export default Vue.component('mainComponent', {
           chartOptions.xaxis.categories = [...data.map((d) => d.label)]
           this.chartOptions = { ...chartOptions }
         })
-    let unsubscribe = subscribe();
+    let unsubscribe = subscribe()
     setInterval(() => {
       if (
         startDate !=
@@ -99,8 +101,8 @@ export default Vue.component('mainComponent', {
           .startOf('minute')
           .format('x')
         endDate = moment().startOf('minute').format('x')
-        unsubscribe();
-        subscribe();
+        unsubscribe()
+        subscribe()
       }
     }, 500)
 
@@ -135,6 +137,30 @@ export default Vue.component('mainComponent', {
         <div class="hero-body">
           <div class="container">
             <apexchart type="line" height="350" :options="chartOptions" :series="series"></apexchart>
+          </div>
+          <br/>
+          <div class="container">
+              <span>Select:</span>
+              <select v-model="selected1">
+                 <option disabled value="">Please select one</option>
+                 <option>A</option>
+                 <option>B</option>
+                 <option>C</option>
+              </select>
+              <br />
+              <span>Compare with:</span>
+              <select v-model="selected2">
+                <option disabled value="">Please select one</option>
+                <option>A</option>
+                <option>B</option>
+                <option>C</option>
+              </select>
+              <br />
+              <hr/>
+              <div>At 2:13 Toal sales where: 200$</div>
+              <div>At 2:15 Toal sales where: 220$</div>
+              <div>From 2:13 to 2:13 you made 20$ </div>
+              <span>Selected: {{ selected1 }}</span>
           </div>
         </div>
       </section>

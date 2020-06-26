@@ -1,4 +1,4 @@
 # TODO
-* fix collection subscription
-* show chart
-* mock where filter, test it, and use it
+* add project total from previous month
+* generate transactions
+* add dropdowns
